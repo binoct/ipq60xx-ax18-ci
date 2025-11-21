@@ -81,7 +81,7 @@ sed -i 's|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES) $(1)/usr/bi
 UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
 
-#主题配置
+#argon主题配置
 UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
 
 #######################################
@@ -128,7 +128,7 @@ keywords_to_delete=(
 )
 
 [[ $WRT_CONFIG == *"WIFI-NO"* ]] && keywords_to_delete+=("usb" "wpad" "hostapd")
-[[ $WRT_CONFIG != *"EMMC"* ]] && keywords_to_delete+=("autosamba")
+#[[ $WRT_CONFIG != *"EMMC"* ]] && keywords_to_delete+=("samba" "autosamba" "disk")
 [[ $WRT_CONFIG == *"EMMC"* ]] && keywords_to_delete+=("cmiot_ax18" "qihoo_v6" "qihoo_360v6" "redmi_ax5=y" "zn_m2")
 
 for keyword in "${keywords_to_delete[@]}"; do
@@ -165,11 +165,9 @@ provided_config_lines=(
     "CONFIG_PACKAGE_luci-app-filetransfer=y"
     "CONFIG_PACKAGE_openssh-sftp-server=y"
     "CONFIG_PACKAGE_luci-app-frpc=y" 
-	#opkg 启用 istore需要
-    "CONFIG_OPKG_USE_CURL=y"
-    "CONFIG_PACKAGE_opkg=y"   
-    "CONFIG_USE_APK=n"
-    #opkg 启用 istore需要
+    #"CONFIG_OPKG_USE_CURL=y"
+    #"CONFIG_PACKAGE_opkg=y"   
+    #"CONFIG_USE_APK=n"
     "CONFIG_PACKAGE_luci-app-tailscale=y"
     #"CONFIG_PACKAGE_luci-app-msd_lite=y"
     "CONFIG_PACKAGE_luci-app-lucky=y"
@@ -267,8 +265,7 @@ for line in "${provided_config_lines[@]}"; do
 done
 
 #删除一些包 节省空间
-[[ $WRT_CONFIG == *"AX18"* ]] && keywords_to_delete+=("adguardhome" "cpufreq" "frpc" "frps" "gecoosac" "homeproxy" "lucky" "openlist" "netspeedtest" "passwall" "samba4")
-[[ $WRT_CONFIG == *"IPQ8064"* ]] && keywords_to_delete+=("homeproxy" "qca-nss" "passwall" "samba4")
+[[ $WRT_CONFIG == *"AX18"* ]] && keywords_to_delete+=("adguardhome" "frpc" "frps" "gecoosac" "homeproxy" "lucky" "netspeedtest" "openlist" "passwall" "samba4")
 
 for keyword in "${keywords_to_delete[@]}"; do
     sed -i "/$keyword/d" ./.config
@@ -291,14 +288,14 @@ install -Dm755 "${GITHUB_WORKSPACE}/Scripts/99_ttyd-nopass.sh" "package/base-fil
 
 install -Dm755 "${GITHUB_WORKSPACE}/Scripts/99_set_argon_primary" "package/base-files/files/etc/uci-defaults/99_set_argon_primary"
 
-#opkg时候启用
-install -Dm755 "${GITHUB_WORKSPACE}/Scripts/99-distfeeds.conf" "package/emortal/default-settings/files/99-distfeeds.conf"
-sed -i '/define Package\/default-settings\/install/a \
-\t$(INSTALL_DIR) $(1)/etc\n\t$(INSTALL_DATA) ./files/99-distfeeds.conf $(1)/etc/99-distfeeds.conf' \
-package/emortal/default-settings/Makefile
-sed -i "/exit 0/i\\
-[ -f \'/etc/99-distfeeds.conf\' ] && mv \'/etc/99-distfeeds.conf\' \'/etc/opkg/distfeeds.conf\'\n\
-sed -ri \'/check_signature/s@^[^#]@#&@\' /etc/opkg.conf\n" "package/emortal/default-settings/files/99-default-settings"
+#使用opkg去掉注释
+#install -Dm755 "${GITHUB_WORKSPACE}/Scripts/99-distfeeds.conf" "package/emortal/default-settings/files/99-distfeeds.conf"
+#sed -i '/define Package\/default-settings\/install/a \
+#\t$(INSTALL_DIR) $(1)/etc\n\t$(INSTALL_DATA) ./files/99-distfeeds.conf $(1)/etc/99-distfeeds.conf' \
+#package/emortal/default-settings/Makefile
+#sed -i "/exit 0/i\\
+#[ -f \'/etc/99-distfeeds.conf\' ] && mv \'/etc/99-distfeeds.conf\' \'/etc/opkg/distfeeds.conf\'\n\
+#sed -ri \'/check_signature/s@^[^#]@#&@\' /etc/opkg.conf\n" "package/emortal/default-settings/files/99-default-settings"
 
 #解决 dropbear 配置的 bug
 install -Dm755 "${GITHUB_WORKSPACE}/Scripts/99_dropbear_setup.sh" "package/base-files/files/etc/uci-defaults/99_dropbear_setup"
