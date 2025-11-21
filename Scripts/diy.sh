@@ -265,7 +265,7 @@ for line in "${provided_config_lines[@]}"; do
 done
 
 #删除一些包 节省空间
-[[ $WRT_CONFIG == *"AX18"* ]] && keywords_to_delete+=("adguardhome" "frpc" "frps" "gecoosac" "homeproxy" "lucky" "netspeedtest" "openlist" "passwall" "samba4")
+[[ $WRT_CONFIG == *"AX18"* ]] && keywords_to_delete+=("adguardhome" "frpc" "frps" "gecoosac" "homeproxy" "lucky" "netspeedtest" "openclash" "openlist" "passwall" "samba4")
 
 for keyword in "${keywords_to_delete[@]}"; do
     sed -i "/$keyword/d" ./.config
